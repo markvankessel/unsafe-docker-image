@@ -26,6 +26,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           image: mvkessel/unsafe-image
+          args: --severity-threshold=high --fail-on=upgradable
       - name: Push image
         run: "docker push mvkessel/unsafe-image"
   
