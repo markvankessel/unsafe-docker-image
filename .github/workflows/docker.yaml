@@ -20,6 +20,12 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
       - name: Build Docker image
         run: "docker build -t mvkessel/unsafe-image ."
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/docker@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          image: mvkessel/unsafe-image
       - name: Push image
         run: "docker push mvkessel/unsafe-image"
   
