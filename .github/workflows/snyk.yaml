@@ -1,4 +1,4 @@
-name: build-docker-images
+name: snyk test workflow
 on:
   push:
     branches:
@@ -26,6 +26,4 @@ jobs:
         run: "snyk auth $SNYK_TOKEN"
       - name: Build and check image
         run: "bash scripts/build.sh"
-      - name: Push image
-        run: "docker push mvkessel/unsafe-image"
   
