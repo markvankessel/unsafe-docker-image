@@ -20,6 +20,12 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
       - name: Build Docker image
         run: "docker build -t mvkessel/unsafe-image ."
+      - name: Install snyk CLI
+        run: "npm install snyk -g"
+      - name: Authenticate snyk
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: "snyk auth $SNYK_TOKEN"
       - name: Run Snyk to check for vulnerabilities
         uses: snyk/actions/docker@master
         env:
