@@ -40,15 +40,22 @@ jobs:
         uses: actions/checkout@v2
       - name: Build image
         run: docker build -t mvkessel/${{matrix.image}}:${{ github.sha }} images/${{matrix.image}}
-      - name: Run Trivy vulnerability scanner
+      - name: Run Trivy vulnerability scanner (informative)
         uses: aquasecurity/trivy-action@2a2157eb22c08c9a1fac99263430307b8d1bc7a2
         with:
           image-ref: 'mvkessel/${{matrix.image}}:${{ github.sha }}'
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
-          output: 'trivy-results.sarif'
-          severity: 'CRITICAL,HIGH'
-      - name: Upload Trivy scan results to GitHub Security tab
-        uses: github/codeql-action/upload-sarif@v1
+          format: table
+      - name: Run Trivy vulnerability scanner (enforcing)
+        uses: aquasecurity/trivy-action@2a2157eb22c08c9a1fac99263430307b8d1bc7a2
         with:
-          sarif_file: 'trivy-results.sarif'
+          image-ref: 'mvkessel/${{matrix.image}}:${{ github.sha }}'
+          format: table
+          severity: 'CRITICAL'
+          exit-code: 1
+          # format: 'template'
+          # template: '@/contrib/sarif.tpl'
+          # output: 'trivy-results.sarif'
+      # - name: Upload Trivy scan results to GitHub Security tab
+      #   uses: github/codeql-action/upload-sarif@v1
+      #   with:
+      #     sarif_file: 'trivy-results.sarif'
