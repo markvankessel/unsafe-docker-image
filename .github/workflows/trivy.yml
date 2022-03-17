@@ -8,39 +8,46 @@ name: build
 on:
   push:
     branches: [ main ]
-  pull_request:
-    # The branches below must be a subset of the branches above
-    branches: [ main ]
-  schedule:
-    - cron: '41 18 * * 5'
 
 permissions:
   contents: read
 
 jobs:
-  build:
+  search:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+      - id: set-matrix
+        run: |
+          FILES=$(find images -name Dockerfile | sed -e 's#^images/##' -e 's#/Dockerfile$##' | jq -Rsc '. / "\n" - [""]')
+          echo $FILES
+          echo "::set-output name=matrix::$FILES"
+
+  echo:
+    name: Build and check ${{ matrix.image }}
+    needs: search
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        image: ${{fromJSON(needs.search.outputs.matrix)}}
     permissions:
       contents: read # for actions/checkout to fetch code
       security-events: write # for github/codeql-action/upload-sarif to upload SARIF results
-    name: Build
-    runs-on: "ubuntu-18.04"
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
-      - name: Build an image from Dockerfile
-        run: |
-          docker build -t mvkessel/unsage-image:${{ github.sha }} .
-
+      - name: Build image
+        run: docker build -t mvkessel/${{matrix.image}}:${{ github.sha }} images/${{matrix.image}}
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@2a2157eb22c08c9a1fac99263430307b8d1bc7a2
         with:
-          image-ref: 'mvkessel/unsage-image:${{ github.sha }}'
+          image-ref: 'mvkessel/${{matrix.image}}:${{ github.sha }}'
           format: 'template'
           template: '@/contrib/sarif.tpl'
           output: 'trivy-results.sarif'
           severity: 'CRITICAL,HIGH'
-
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v1
         with:
