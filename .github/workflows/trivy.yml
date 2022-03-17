@@ -30,6 +30,7 @@ jobs:
     needs: search
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         image: ${{fromJSON(needs.search.outputs.matrix)}}
     permissions:
