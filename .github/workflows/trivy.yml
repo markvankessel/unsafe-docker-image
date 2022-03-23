@@ -42,14 +42,13 @@ jobs:
       - name: Build image
         run: docker build -t mvkessel/${{matrix.image}}:${{ github.sha }} images/${{matrix.image}}
       - name: Run Trivy vulnerability scanner (informative)
-        uses: aquasecurity/trivy-action@2a2157eb22c08c9a1fac99263430307b8d1bc7a2
+        uses: aquasecurity/trivy-action@0.2.2
         with:
           image-ref: 'mvkessel/${{matrix.image}}:${{ github.sha }}'
-          format: 'template'
-          template: '@/contrib/sarif.tpl'
+          format: 'sarif'
           output: 'trivy-results.sarif'
       - name: Run Trivy vulnerability scanner (enforcing)
-        uses: aquasecurity/trivy-action@2a2157eb22c08c9a1fac99263430307b8d1bc7a2
+        uses: aquasecurity/trivy-action@0.2.2
         with:
           image-ref: 'mvkessel/${{matrix.image}}:${{ github.sha }}'
           format: table
